@@ -29,13 +29,13 @@ import cubicchunks.regionlib.impl.MinecraftChunkLocation;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
-public class AnvilChunkData {
-
+//separate class from AnvilChunkData because they shouldn't be assignable to each other
+public class NukkitChunkData {
     protected final Dimension dimension;
     protected final MinecraftChunkLocation position;
     protected final ByteBuffer data;
 
-    public AnvilChunkData(Dimension dimension, MinecraftChunkLocation position, ByteBuffer data) {
+    public NukkitChunkData(Dimension dimension, MinecraftChunkLocation position, ByteBuffer data) {
         this.dimension = dimension;
         this.position = position;
         this.data = data;
@@ -53,28 +53,31 @@ public class AnvilChunkData {
         return data;
     }
 
-    @Override public boolean equals(Object o) {
+    @Override
+    public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        AnvilChunkData that = (AnvilChunkData) o;
+        NukkitChunkData that = (NukkitChunkData) o;
         return dimension.equals(that.dimension) &&
-            position.equals(that.position) &&
-            data.equals(that.data);
+                position.equals(that.position) &&
+                data.equals(that.data);
     }
 
-    @Override public int hashCode() {
+    @Override
+    public int hashCode() {
         return Objects.hash(dimension, position, data);
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return "AnvilChunkData{" +
-            "dimension='" + dimension + '\'' +
-            ", position=" + position +
-            ", data=" + data +
-            '}';
+                "dimension='" + dimension + '\'' +
+                ", position=" + position +
+                ", data=" + data +
+                '}';
     }
 }

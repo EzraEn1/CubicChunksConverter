@@ -35,17 +35,22 @@ import cubicchunks.converter.lib.convert.anvil2cc.Anvil2CCLevelInfoConverter;
 import cubicchunks.converter.lib.convert.cc2anvil.CC2AnvilDataConverter;
 import cubicchunks.converter.lib.convert.cc2anvil.CC2AnvilLevelInfoConverter;
 import cubicchunks.converter.lib.convert.data.AnvilChunkData;
+import cubicchunks.converter.lib.convert.data.NukkitChunkData;
 import cubicchunks.converter.lib.convert.data.CubicChunksColumnData;
 import cubicchunks.converter.lib.convert.data.MultilayerAnvilChunkData;
 import cubicchunks.converter.lib.convert.data.RobintonColumnData;
 import cubicchunks.converter.lib.convert.io.AnvilChunkReader;
 import cubicchunks.converter.lib.convert.io.AnvilChunkWriter;
+import cubicchunks.converter.lib.convert.io.NukkitChunkReader;
 import cubicchunks.converter.lib.convert.io.CubicChunkReader;
 import cubicchunks.converter.lib.convert.io.CubicChunkWriter;
 import cubicchunks.converter.lib.convert.io.NoopChunkWriter;
 import cubicchunks.converter.lib.convert.io.RobintonChunkReader;
+import cubicchunks.converter.lib.convert.io.SingleAnvilChunkWriter;
 import cubicchunks.converter.lib.convert.noop.NoopDataConverter;
 import cubicchunks.converter.lib.convert.noop.NoopLevelInfoConverter;
+import cubicchunks.converter.lib.convert.nukkit2anvil.Nukkit2AnvilDataConverter;
+import cubicchunks.converter.lib.convert.nukkit2anvil.Nukkit2AnvilLevelInfoConverter;
 import cubicchunks.converter.lib.convert.robinton2cc.Robinton2CCConverter;
 import cubicchunks.converter.lib.convert.robinton2cc.Robinton2CCLevelInfoConverter;
 
@@ -69,15 +74,18 @@ public class Registry {
         registerReader("Anvil", AnvilChunkReader::new, AnvilChunkData.class);
         registerReader("CubicChunks", CubicChunkReader::new, CubicChunksColumnData.class);
         registerReader("RobintonCubicChunks", RobintonChunkReader::new, RobintonColumnData.class);
+        registerReader("Nukkit", NukkitChunkReader::new, NukkitChunkData.class);
 
-        registerWriter("Anvil", AnvilChunkWriter::new, MultilayerAnvilChunkData.class);
+        registerWriter("Anvil (layered)", AnvilChunkWriter::new, MultilayerAnvilChunkData.class);
+        registerWriter("Anvil", SingleAnvilChunkWriter::new, AnvilChunkData.class);
         registerWriter("CubicChunks", CubicChunkWriter::new, CubicChunksColumnData.class);
 
         registerConverter(Anvil2CCDataConverter::new, Anvil2CCLevelInfoConverter::new, AnvilChunkData.class, CubicChunksColumnData.class);
         registerConverter(CC2AnvilDataConverter::new, CC2AnvilLevelInfoConverter::new, CubicChunksColumnData.class, MultilayerAnvilChunkData.class);
         registerConverter(Robinton2CCConverter::new, Robinton2CCLevelInfoConverter::new, RobintonColumnData.class, CubicChunksColumnData.class);
+        registerConverter(Nukkit2AnvilDataConverter::new, Nukkit2AnvilLevelInfoConverter::new, NukkitChunkData.class, AnvilChunkData.class);
 
-        registerNoops();
+        //registerNoops();
     }
 
     private static void registerNoops() {
