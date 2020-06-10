@@ -52,8 +52,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipException;
 
-import javax.annotation.Nullable;
-
 public class CC2AnvilDataConverter implements ChunkDataConverter<CubicChunksColumnData, MultilayerAnvilChunkData> {
 
     @Override public MultilayerAnvilChunkData convert(CubicChunksColumnData input) {
@@ -73,7 +71,7 @@ public class CC2AnvilDataConverter implements ChunkDataConverter<CubicChunksColu
         return new MultilayerAnvilChunkData(data);
     }
 
-    private ByteBuffer convertWorldLayer(@Nullable ByteBuffer columnData, ByteBuffer[] cubes, int layerIdx) {
+    private ByteBuffer convertWorldLayer(ByteBuffer columnData, ByteBuffer[] cubes, int layerIdx) {
         try {
             if (dropChunk(cubes, layerIdx)) {
                 return null;
@@ -99,7 +97,7 @@ public class CC2AnvilDataConverter implements ChunkDataConverter<CubicChunksColu
         return false;
     }
 
-    private CompoundTag convertWorldLayer(@Nullable CompoundTag column, CompoundTag[] cubes, int layerIdx) {
+    private CompoundTag convertWorldLayer(CompoundTag column, CompoundTag[] cubes, int layerIdx) {
         /*
          *
          * Vanilla Chunk NBT structure:
@@ -162,7 +160,7 @@ public class CC2AnvilDataConverter implements ChunkDataConverter<CubicChunksColu
 
     }
 
-    private void convertLevel(CompoundMap level, @Nullable CompoundTag column, CompoundTag[] cubes, int layerIdx) {
+    private void convertLevel(CompoundMap level, CompoundTag column, CompoundTag[] cubes, int layerIdx) {
         /*
          *
          * Vanilla Chunk NBT structure:

@@ -1,7 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.ShadowPlugin
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import nl.javadude.gradle.plugins.license.LicenseExtension
-import nl.javadude.gradle.plugins.license.LicensePlugin
 import org.ajoberstar.grgit.Grgit
 import org.ajoberstar.grgit.operation.DescribeOp
 import org.gradle.api.internal.HasConvention
@@ -14,7 +12,6 @@ buildscript {
     }
     dependencies {
         classpath("org.ajoberstar:grgit:1.4.+")
-        classpath("gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:0.13.1")
         classpath("com.github.jengelman.gradle.plugins:shadow:1.2.3")
     }
 }
@@ -32,7 +29,6 @@ apply {
     plugin<JavaPlugin>()
     plugin<MavenPlugin>()
     plugin<SigningPlugin>()
-    plugin<LicensePlugin>()
     plugin<ShadowPlugin>()
 }
 
@@ -41,22 +37,6 @@ val sourceSets = the<JavaPluginConvention>().sourceSets!!
 
 configure<JavaPluginConvention> {
     setSourceCompatibility(JavaVersion.VERSION_1_8)
-}
-
-
-configure<LicenseExtension> {
-    val ext = (this as HasConvention).convention.extraProperties
-    ext["project"] = projectName
-    ext["year"] = licenseYear
-    exclude("**/*.info")
-    exclude("**/package-info.java")
-    exclude("**/*.json")
-    exclude("**/*.xml")
-    exclude("assets/*")
-    header = file("HEADER.txt")
-    ignoreFailures = false
-    strictCheck = true
-    mapping(mapOf("java" to "SLASHSTAR_STYLE"))
 }
 
 repositories {

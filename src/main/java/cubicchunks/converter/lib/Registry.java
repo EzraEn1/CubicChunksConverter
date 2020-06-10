@@ -32,6 +32,8 @@ import cubicchunks.converter.lib.convert.ChunkDataWriter;
 import cubicchunks.converter.lib.convert.LevelInfoConverter;
 import cubicchunks.converter.lib.convert.anvil2cc.Anvil2CCDataConverter;
 import cubicchunks.converter.lib.convert.anvil2cc.Anvil2CCLevelInfoConverter;
+import cubicchunks.converter.lib.convert.anvil2nukkit.Anvil2NukkitDataConverter;
+import cubicchunks.converter.lib.convert.anvil2nukkit.Anvil2NukkitLevelInfoConverter;
 import cubicchunks.converter.lib.convert.cc2anvil.CC2AnvilDataConverter;
 import cubicchunks.converter.lib.convert.cc2anvil.CC2AnvilLevelInfoConverter;
 import cubicchunks.converter.lib.convert.data.AnvilChunkData;
@@ -45,6 +47,7 @@ import cubicchunks.converter.lib.convert.io.NukkitChunkReader;
 import cubicchunks.converter.lib.convert.io.CubicChunkReader;
 import cubicchunks.converter.lib.convert.io.CubicChunkWriter;
 import cubicchunks.converter.lib.convert.io.NoopChunkWriter;
+import cubicchunks.converter.lib.convert.io.NukkitChunkWriter;
 import cubicchunks.converter.lib.convert.io.RobintonChunkReader;
 import cubicchunks.converter.lib.convert.io.SingleAnvilChunkWriter;
 import cubicchunks.converter.lib.convert.noop.NoopDataConverter;
@@ -79,11 +82,13 @@ public class Registry {
         registerWriter("Anvil (layered)", AnvilChunkWriter::new, MultilayerAnvilChunkData.class);
         registerWriter("Anvil", SingleAnvilChunkWriter::new, AnvilChunkData.class);
         registerWriter("CubicChunks", CubicChunkWriter::new, CubicChunksColumnData.class);
+        registerWriter("Nukkit", NukkitChunkWriter::new, NukkitChunkData.class);
 
         registerConverter(Anvil2CCDataConverter::new, Anvil2CCLevelInfoConverter::new, AnvilChunkData.class, CubicChunksColumnData.class);
         registerConverter(CC2AnvilDataConverter::new, CC2AnvilLevelInfoConverter::new, CubicChunksColumnData.class, MultilayerAnvilChunkData.class);
         registerConverter(Robinton2CCConverter::new, Robinton2CCLevelInfoConverter::new, RobintonColumnData.class, CubicChunksColumnData.class);
         registerConverter(Nukkit2AnvilDataConverter::new, Nukkit2AnvilLevelInfoConverter::new, NukkitChunkData.class, AnvilChunkData.class);
+        registerConverter(Anvil2NukkitDataConverter::new, Anvil2NukkitLevelInfoConverter::new, AnvilChunkData.class, NukkitChunkData.class);
 
         //registerNoops();
     }
