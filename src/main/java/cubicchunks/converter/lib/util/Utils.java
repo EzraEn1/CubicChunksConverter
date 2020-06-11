@@ -50,6 +50,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.InflaterInputStream;
@@ -195,6 +196,18 @@ public class Utils {
             bytes.write(1); // mark as GZIP
         }
         NBTOutputStream nbtOut = new NBTOutputStream(new BufferedOutputStream(new GZIPOutputStream(bytes)), false);
+        nbtOut.writeTag(tag);
+        nbtOut.close();
+        bytes.flush();
+        return ByteBuffer.wrap(bytes.toByteArray());
+    }
+
+    public static ByteBuffer writeCompressedZlib(CompoundTag tag, boolean prefixFormat) throws IOException {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        if (prefixFormat) {
+            bytes.write(2); // mark as Zlib
+        }
+        NBTOutputStream nbtOut = new NBTOutputStream(new BufferedOutputStream(new DeflaterOutputStream(bytes)), false);
         nbtOut.writeTag(tag);
         nbtOut.close();
         bytes.flush();
