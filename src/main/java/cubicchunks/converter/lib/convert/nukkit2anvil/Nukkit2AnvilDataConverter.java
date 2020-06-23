@@ -180,7 +180,7 @@ public class Nukkit2AnvilDataConverter implements ChunkDataConverter<NukkitChunk
             boolean dirty = ((ListTag<CompoundTag>) ((CompoundTag) tag.getValue().get("Level")).getValue().get("Sections")).getValue().stream()
                     .mapToInt(Nukkit2AnvilDataConverter::fixSection)
                     .max().orElse(0) != 0;
-            return new AnvilChunkData(input.getDimension(), input.getPosition(), dirty ? Utils.writeCompressed(tag, true) : input.getData());
+            return new AnvilChunkData(input.getDimension(), input.getPosition(), dirty ? Utils.writeCompressedZlib(tag, true) : input.getData());
         } catch (IOException e) {
             throw new AssertionError(e);
         }

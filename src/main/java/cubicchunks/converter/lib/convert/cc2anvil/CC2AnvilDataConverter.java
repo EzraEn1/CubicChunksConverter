@@ -23,9 +23,6 @@
  */
 package cubicchunks.converter.lib.convert.cc2anvil;
 
-import static cubicchunks.converter.lib.util.Utils.readCompressedCC;
-import static cubicchunks.converter.lib.util.Utils.writeCompressed;
-
 import com.flowpowered.nbt.ByteTag;
 import com.flowpowered.nbt.CompoundMap;
 import com.flowpowered.nbt.CompoundTag;
@@ -51,6 +48,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipException;
+
+import static cubicchunks.converter.lib.util.Utils.*;
 
 public class CC2AnvilDataConverter implements ChunkDataConverter<CubicChunksColumnData, MultilayerAnvilChunkData> {
 
@@ -84,7 +83,7 @@ public class CC2AnvilDataConverter implements ChunkDataConverter<CubicChunksColu
                 }
             }
             CompoundTag tag = convertWorldLayer(columnTag, cubeTags, layerIdx);
-            return writeCompressed(tag, true);
+            return writeCompressedZlib(tag, true);
         } catch (ZipException e) {
             e.printStackTrace();
             return null;

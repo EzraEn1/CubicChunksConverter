@@ -190,6 +190,7 @@ public class Utils {
         return (CompoundTag) new NBTInputStream(data, false).readTag();
     }
 
+    @Deprecated
     public static ByteBuffer writeCompressed(CompoundTag tag, boolean prefixFormat) throws IOException {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         if (prefixFormat) {
