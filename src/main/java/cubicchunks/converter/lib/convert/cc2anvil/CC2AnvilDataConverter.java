@@ -65,7 +65,7 @@ public class CC2AnvilDataConverter implements ChunkDataConverter<CubicChunksColu
         });
         // convert each world layer separately
         worldLayers.forEach((key, value) ->
-            data.put(key, new AnvilChunkData(input.getDimension(), chunkPos, convertWorldLayer(input.getColumnData(), value, key)))
+            data.put(key, new AnvilChunkData(input.getDimension(), chunkPos, convertWorldLayer(input.getColumnData(), value, key), 0))
         );
         return new MultilayerAnvilChunkData(data);
     }

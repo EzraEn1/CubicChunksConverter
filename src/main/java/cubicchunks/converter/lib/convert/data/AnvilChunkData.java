@@ -34,11 +34,13 @@ public class AnvilChunkData {
     protected final Dimension dimension;
     protected final MinecraftChunkLocation position;
     protected final ByteBuffer data;
+    public final int offsetSections;
 
-    public AnvilChunkData(Dimension dimension, MinecraftChunkLocation position, ByteBuffer data) {
+    public AnvilChunkData(Dimension dimension, MinecraftChunkLocation position, ByteBuffer data, int offsetSections) {
         this.dimension = dimension;
         this.position = position;
         this.data = data;
+        this.offsetSections = offsetSections;
     }
 
     public Dimension getDimension() {

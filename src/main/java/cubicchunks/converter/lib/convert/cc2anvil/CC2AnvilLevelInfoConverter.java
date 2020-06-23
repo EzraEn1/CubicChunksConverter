@@ -97,6 +97,9 @@ public class CC2AnvilLevelInfoConverter implements LevelInfoConverter<CubicChunk
     }
 
     private String getGeneratorName(String value) {
+        if (true)   {
+            return "flat";
+        }
         switch (value) {
             case "CustomCubic":
             case "VanillaCubic":

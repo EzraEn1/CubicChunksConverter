@@ -34,8 +34,15 @@ import cubicchunks.converter.lib.convert.data.MultilayerAnvilChunkData;
 import cubicchunks.converter.lib.util.Utils;
 import cubicchunks.regionlib.impl.save.MinecraftSaveSection;
 
+import java.io.BufferedWriter;
 import java.io.Closeable;
+import java.io.DataOutput;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,8 +63,19 @@ public class AnvilChunkWriter implements ChunkDataWriter<MultilayerAnvilChunkDat
             AnvilChunkData chunk = entry.getValue();
             Map<Dimension, MinecraftSaveSection> layer = saves.computeIfAbsent(layerY, i -> new HashMap<>());
             MinecraftSaveSection save = layer.computeIfAbsent(chunk.getDimension(), propagateExceptions(dim -> {
-                Path regionDir = getDimensionPath(entry.getValue().getDimension(), dstPath.resolve(dirName(layerY)));
+                Path saveRoot = this.dstPath.resolve(dirName(layerY));
+                Path regionDir = getDimensionPath(entry.getValue().getDimension(), saveRoot);
                 Utils.createDirectories(regionDir);
+
+                File offsetFile = new File(saveRoot.toFile(), "offset.txt");
+                try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(offsetFile), StandardCharsets.UTF_8))) {
+                    writer.write(String.valueOf(layerY << 4));
+                    writer.newLine();
+                } catch (IOException e)  {
+                    e.printStackTrace();
+                    throw new RuntimeException(e);
+                }
+
                 return MinecraftSaveSection.createAt(regionDir, MCA);
             }));
             save.save(chunk.getPosition(), chunk.getData());

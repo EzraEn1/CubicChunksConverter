@@ -46,6 +46,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +55,7 @@ public class Anvil2CCDataConverter implements ChunkDataConverter<AnvilChunkData,
 
     public CubicChunksColumnData convert(AnvilChunkData input) {
         try {
-            Map<Integer, ByteBuffer> cubes = extractCubeData(input.getData());
+            Map<Integer, ByteBuffer> cubes = extractCubeData(input.getData(), input.offsetSections);
             ByteBuffer column = extractColumnData(input.getData());
             EntryLocation2D location = new EntryLocation2D(input.getPosition().getEntryX(), input.getPosition().getEntryZ());
             return new CubicChunksColumnData(input.getDimension(), location, column, cubes);
@@ -154,9 +155,9 @@ public class Anvil2CCDataConverter implements ChunkDataConverter<AnvilChunkData,
         return buf.toByteArray();
     }
 
-    private Map<Integer, ByteBuffer> extractCubeData(ByteBuffer vanillaData) throws IOException {
+    private Map<Integer, ByteBuffer> extractCubeData(ByteBuffer vanillaData, int offset) throws IOException {
         ByteArrayInputStream in = new ByteArrayInputStream(vanillaData.array());
-        Map<Integer, CompoundTag> tags = extractCubeData(Utils.readCompressed(in));
+        Map<Integer, CompoundTag> tags = extractCubeData(Utils.readCompressed(in), offset);
         Map<Integer, ByteBuffer> bytes = new HashMap<>();
         for (Integer y : tags.keySet()) {
             bytes.put(y, Utils.writeCompressed(tags.get(y), false));
@@ -165,7 +166,7 @@ public class Anvil2CCDataConverter implements ChunkDataConverter<AnvilChunkData,
     }
 
     @SuppressWarnings("unchecked")
-    private Map<Integer, CompoundTag> extractCubeData(CompoundTag srcRootTag) {
+    private Map<Integer, CompoundTag> extractCubeData(CompoundTag srcRootTag, int offset) {
         /*
          *
          * Vanilla Chunk NBT structure:
@@ -239,7 +240,7 @@ public class Anvil2CCDataConverter implements ChunkDataConverter<AnvilChunkData,
                 {
                     level.put(new ByteTag("v", (byte) 1));
                     level.put(new IntTag("x", x));
-                    level.put(new IntTag("y", y));
+                    level.put(new IntTag("y", y + offset));
                     level.put(new IntTag("z", z));
 
                     ByteTag populated = (ByteTag) srcLevel.get("TerrainPopulated");
@@ -253,16 +254,16 @@ public class Anvil2CCDataConverter implements ChunkDataConverter<AnvilChunkData,
                     // the vanilla section has additional Y tag, it will be ignored by cubic chunks
                     level.put(new ListTag<>("Sections", CompoundTag.class, singletonList(fixSection(srcSection))));
 
-                    level.put(filterEntities((ListTag<CompoundTag>) srcLevel.get("Entities"), y));
-                    level.put(filterTileEntities((ListTag<?>) srcLevel.get("TileEntities"), y));
+                    level.put(filterEntities((ListTag<CompoundTag>) srcLevel.get("Entities"), y, offset));
+                    level.put(filterTileEntities((ListTag<?>) srcLevel.get("TileEntities"), y, offset));
                     if (srcLevel.containsKey("TileTicks")) {
-                        level.put(filterTileTicks((ListTag<CompoundTag>) srcLevel.get("TileTicks"), y));
+                        level.put(filterTileTicks((ListTag<CompoundTag>) srcLevel.get("TileTicks"), y, offset));
                     }
                     level.put(makeLightingInfo(srcLevel));
                 }
                 root.put(new CompoundTag("Level", level));
             }
-            tags.put(y, new CompoundTag("", root));
+            tags.put(y + offset, new CompoundTag("", root));
         }
         // make sure the 0-15 range is there because it's using vanilla generator which expects it to be the case
         for (int y = 0; y < 16; y++) {
@@ -330,7 +331,7 @@ public class Anvil2CCDataConverter implements ChunkDataConverter<AnvilChunkData,
     }
 
     @SuppressWarnings("unchecked")
-    private ListTag<CompoundTag> filterEntities(ListTag<CompoundTag> entities, int cubeY) {
+    private ListTag<CompoundTag> filterEntities(ListTag<CompoundTag> entities, int cubeY, int offset) {
         double yMin = cubeY * 16;
         double yMax = yMin + 16;
         List<CompoundTag> cubeEntities = new ArrayList<>();
@@ -338,6 +339,13 @@ public class Anvil2CCDataConverter implements ChunkDataConverter<AnvilChunkData,
             List<DoubleTag> pos = ((ListTag<DoubleTag>) entityTag.getValue().get("Pos")).getValue();
             double y = pos.get(1).getValue();
             if (y >= yMin && y < yMax) {
+                if (offset != 0) {
+                    entityTag.getValue().put(new ListTag<>(
+                            "Pos",
+                            DoubleTag.class,
+                            Arrays.asList(pos.get(0), new DoubleTag("", y + (offset << 4)), pos.get(2))
+                    ));
+                }
                 cubeEntities.add(entityTag);
             }
         }
@@ -345,7 +353,7 @@ public class Anvil2CCDataConverter implements ChunkDataConverter<AnvilChunkData,
     }
 
     @SuppressWarnings("unchecked")
-    private ListTag<?> filterTileEntities(ListTag<?> tileEntities, int cubeY) {
+    private ListTag<?> filterTileEntities(ListTag<?> tileEntities, int cubeY, int offset) {
         // empty list is list of EndTags
         if (tileEntities.getValue().isEmpty()) {
             return tileEntities;
@@ -356,19 +364,25 @@ public class Anvil2CCDataConverter implements ChunkDataConverter<AnvilChunkData,
         for (CompoundTag teTag : ((ListTag<CompoundTag>) tileEntities).getValue()) {
             int y = ((IntTag) teTag.getValue().get("y")).getValue();
             if (y >= yMin && y < yMax) {
+                if (offset != 0) {
+                    teTag.getValue().put(new IntTag("y", y + (offset << 4)));
+                }
                 cubeTEs.add(teTag);
             }
         }
         return new ListTag<>(tileEntities.getName(), CompoundTag.class, cubeTEs);
     }
 
-    private ListTag<CompoundTag> filterTileTicks(ListTag<CompoundTag> tileTicks, int cubeY) {
+    private ListTag<CompoundTag> filterTileTicks(ListTag<CompoundTag> tileTicks, int cubeY, int offset) {
         int yMin = cubeY * 16;
         int yMax = yMin + 16;
         List<CompoundTag> cubeTicks = new ArrayList<>();
         for (CompoundTag tileTick : tileTicks.getValue()) {
             int y = ((IntTag) tileTick.getValue().get("y")).getValue();
             if (y >= yMin && y < yMax) {
+                if (offset != 0) {
+                    tileTick.getValue().put(new IntTag("y", y + (offset << 4)));
+                }
                 cubeTicks.add(tileTick);
             }
         }

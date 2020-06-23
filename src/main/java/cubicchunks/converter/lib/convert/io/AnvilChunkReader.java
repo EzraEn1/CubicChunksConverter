@@ -32,7 +32,13 @@ import cubicchunks.converter.lib.convert.data.AnvilChunkData;
 import cubicchunks.converter.lib.util.UncheckedInterruptedException;
 import cubicchunks.regionlib.impl.save.MinecraftSaveSection;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -40,10 +46,22 @@ import java.util.function.Consumer;
 public class AnvilChunkReader extends BaseMinecraftReader<AnvilChunkData, MinecraftSaveSection> {
 
     private final Thread loadThread;
+    private final int offset;
 
     public AnvilChunkReader(Path srcDir) {
         super(srcDir, (dim, path) -> exists(getDimensionPath(dim, path)) ? MinecraftSaveSection.createAt(getDimensionPath(dim, path), MCA) : null);
         loadThread = Thread.currentThread();
+
+        int offset = 0;
+        File offsetFile = new File(srcDir.toFile(), "offset.txt");
+        if (offsetFile.exists())    {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(offsetFile), StandardCharsets.UTF_8))) {
+                offset = Integer.parseInt(reader.readLine());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        this.offset = offset;
     }
 
     private static Path getDimensionPath(Dimension d, Path worldDir) {
@@ -82,7 +100,7 @@ public class AnvilChunkReader extends BaseMinecraftReader<AnvilChunkData, Minecr
             }
             MinecraftSaveSection vanillaSave = entry.getValue();
             Dimension d = entry.getKey();
-            vanillaSave.forAllKeys(interruptibleConsumer(mcPos -> consumer.accept(new AnvilChunkData(d, mcPos, vanillaSave.load(mcPos).orElse(null)))));
+            vanillaSave.forAllKeys(interruptibleConsumer(mcPos -> consumer.accept(new AnvilChunkData(d, mcPos, vanillaSave.load(mcPos).orElse(null), this.offset))));
         }
     }
 
