@@ -23,5 +23,8 @@ public class Nukkit2AnvilLevelInfoConverter implements LevelInfoConverter<Nukkit
     @Override
     public void convert() throws IOException {
         Files.copy(this.srcDir.resolve("level.dat"), this.dstDir.resolve("level.dat"));
+        if (Files.exists(this.srcDir.resolve("offset.txt")))    {
+            Files.copy(this.srcDir.resolve("offset.txt"), this.dstDir.resolve("offset.txt"));
+        }
     }
 }
