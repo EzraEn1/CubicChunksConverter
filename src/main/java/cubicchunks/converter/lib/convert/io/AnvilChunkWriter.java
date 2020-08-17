@@ -91,7 +91,7 @@ public class AnvilChunkWriter implements ChunkDataWriter<MultilayerAnvilChunkDat
 
 
     static String dirName(int layerY) {
-        return String.format("layer [%d, %d)", layerY * 256, (layerY + 1) * 256);
+        return String.format("layer [%d, %d]", layerY * 256, (layerY + 1) * 256);
     }
 
     @Override public void discardData() throws IOException {
