@@ -1,6 +1,6 @@
 package io.github.ezraen.bedrockheadless;
 
-import cubicchunks.converter.lib.IProgressListener;
+import cubicchunks.converter.lib.*;
 import cubicchunks.converter.lib.Registry;
 import cubicchunks.converter.lib.convert.ChunkDataConverter;
 import cubicchunks.converter.lib.convert.ChunkDataReader;
@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import com.flowpowered.nbt.*;
 
 public class Main {
 
@@ -24,27 +25,27 @@ public class Main {
         }
         String src = args[0];
         String out = args[1];
-        File Height = new File(src + "//height.txt");
+        File Height = new File(src + "//zero_offset.txt");
         BufferedReader br = new BufferedReader(new FileReader(Height));
         //int alt = false;
         int alt = Integer.parseInt(br.readLine())/256;
         br.close();
 
-        Path temp1 = Paths.get(src).getParent().resolve("temp");
-        File temp = temp1.toFile();
+        Path tempDir = Paths.get(src).getParent().resolve("temp");
+        File temp = tempDir.toFile();
         if (temp.mkdir()) {
-            System.out.println("Creating temp");
+            System.out.println("Creating /temp folder for 1st and 2nd conversion.");
         }
 
 
         WorldConverter<?, ?> converter = new WorldConverter<Object, Object>(
                 (LevelInfoConverter<Object, Object>)Registry.getLevelConverter("CubicChunks", "Anvil (layered)").apply(
                         Paths.get(src),
-                        temp1
+                        tempDir
                 ),
                 (ChunkDataReader<Object>)Registry.getReader("CubicChunks").apply(Paths.get(src)),
                 (ChunkDataConverter<Object, Object>)Registry.getConverter("CubicChunks", "Anvil (layered)").get(),
-                (ChunkDataWriter<Object>)Registry.getWriter("Anvil (layered)").apply(temp1));
+                (ChunkDataWriter<Object>)Registry.getWriter("Anvil (layered)").apply(tempDir));
         converter.convert(new IProgressListener() {
             public void update(Void aVoid) {
             }
@@ -55,7 +56,7 @@ public class Main {
         });
         System.out.println("Conversion 1 ended");
 
-        String src2 = temp1 + "/layer [" + 256 * alt + ", " + (256 * alt + 256) + "]";
+        String src2 = tempDir + "/layer [" + 256 * alt + ", " + (256 * alt + 256) + "]";
         WorldConverter<?, ?> converter2 = new WorldConverter<>(
                 (LevelInfoConverter<Object, Object>)Registry.getLevelConverter("Anvil", "Nukkit").apply(
                         Paths.get(src2),
@@ -73,7 +74,7 @@ public class Main {
             }
         });
         System.out.println("Conversion 2 ended");
-        Files.walk(temp1).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+        Files.walk(tempDir).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
         System.out.println("Done");
     }
 }
