@@ -11,17 +11,18 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import com.flowpowered.nbt.*;
 
-public class Main {
+public class Hijack {
 
     public static void main(String[] args) throws IOException {
         if (args.length < 2) {
-            System.out.println("Jar needs 2 arguments: <path to source world> <output path>");
+            System.out.println("Needs 2 arguments: <path to source world> <output path>");
         }
         String src = args[0];
         String out = args[1];
@@ -75,6 +76,7 @@ public class Main {
         });
         System.out.println("Conversion 2 ended");
         Files.walk(tempDir).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+        Files.copy(Paths.get(src).resolve("zero_offset.txt"),Paths.get(out).resolve("zero_offset.txt"));
         System.out.println("Done");
     }
 }

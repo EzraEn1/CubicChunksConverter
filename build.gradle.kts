@@ -2,7 +2,9 @@ import com.github.jengelman.gradle.plugins.shadow.ShadowPlugin
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.ajoberstar.grgit.Grgit
 import org.ajoberstar.grgit.operation.DescribeOp
-import org.gradle.api.internal.HasConvention
+
+
+
 
 buildscript {
     repositories {
@@ -58,6 +60,7 @@ dependencies {
     dependencies.compile("com.google.guava:guava:27.0.1-jre")
     dependencies.compile(project(":nbt"))
     testCompile("junit:junit:4.11")
+    implementation(kotlin("stdlib"))
 }
 
 jar.apply {
